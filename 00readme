@@ -189,4 +189,39 @@ Success. Task state is saved at /Users/iguchi/tmp/digdag/mydag/.digdag/status/20
   * Use --rerun, --start +NAME, or --goal +NAME argument to rerun skipped tasks.
 iguchi@sky39:~/tmp/digdag/mydag$
 
+############################################################
+# scheduling
+############################################################
+### scheduling設定
+iguchi@sky39:~/tmp/digdag/helloworld (master *)$ head hello_world.dig
+timezone : UTC
 
+schedule:
+    daily>: 07:00:00
+
++step001:
+  sh>: tasks/hello.sh
+
++step002:
+  sh>: tasks/world.sh
+iguchi@sky39:~/tmp/digdag/helloworld (master *)$
+
+### scheduling状態の確認
+iguchi@sky39:~/tmp/digdag/helloworld (master *)$ digdag check
+2017-12-06 00:16:12 +0900: Digdag v0.9.20
+  System default timezone: Asia/Tokyo
+
+  Definitions (2 workflows):
+    time_test (5 tasks)
+    hello_world (18 tasks)
+
+  Parameters:
+    {}
+
+  Schedules (1 entries):
+    hello_world:
+      daily>: "07:00:00"
+      first session time: 2017-12-06 09:00:00 +0900
+      first scheduled to run at: 2017-12-06 16:00:00 +0900 (in 15h 43m 46s)
+
+iguchi@sky39:~/tmp/digdag/helloworld (master *)$

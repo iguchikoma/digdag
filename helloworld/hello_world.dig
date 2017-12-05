@@ -1,5 +1,8 @@
 timezone : UTC
 
+schedule:
+    minutes_interval>: 1
+
 +step001:
   sh>: tasks/hello.sh
 
@@ -12,7 +15,7 @@ timezone : UTC
 +step004:
   py>: tasks.pyhello.MyWorkflow.step2
 
-+prepare:
++prepare1:
   # +step5,6,7,8 run in parallel.
   _parallel: true
 
@@ -28,4 +31,24 @@ timezone : UTC
   +step008:
     py>: tasks.pyhello.MyWorkflow.step2
 
+    #  +step009:
+    #    py>: tasks.pyhello.MyWorkflow.step3
+
 !include : 'time_test.dig'
+
++prepare2:
+  +data1:
+    sh>: tasks/hello.sh
+
+  # +data1 and +data2 run in parallel.
+  +data2:
+    _background: true
+    sh>: tasks/world.sh
+
+  # +data3 runs after +data1 and +data2.
+  +data3:
+    sh>: tasks/goodbye.sh
+
+# this task runs when a workflow fails.
+_error:
+  sh>: tasks/runs_when_workflow_failed.sh

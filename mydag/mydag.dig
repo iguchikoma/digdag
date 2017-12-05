@@ -1,5 +1,8 @@
-timezone: UTC
+timezone: Asia/Tokyo
 
+# + is task
+# type> is action
+# ${...} is variable
 +setup:
   echo>: start ${session_time}
 
@@ -21,3 +24,24 @@ timezone: UTC
   loop>: 3 
   _do:
     echo>: これは${i}番目のループです
+
++check_timezone:
+  echo>: ${timezone}
+
++check_session_uuid:
+  echo>: ${session_uuid}
+
++check_session_time:
+  echo>: ${session_time}
+
++check_session_time_compact:
+  echo>: ${session_date_compact}
+
++check_local_time:
+  echo>: ${session_local_time}
+
++check_tz_offset:
+  echo>: ${session_tz_offset}
+
++check_task_name:
+  echo>: ${task_name}
