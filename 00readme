@@ -1,0 +1,192 @@
+############################################################
+# workflow engineのOSSであるdigdagを試してみる
+# 目的: log基盤等でのactionを発動させる際のworkflow engineとして使えるか？
+# offical site: https://www.digdag.io/
+# tutorial: http://docs.digdag.io/getting_started.html
+# 作業dir: ~/tmp/digdag
+############################################################
+
+############################################################
+# install
+# ref: http://docs.digdag.io/getting_started.html
+############################################################
+
+### install
+iguchi@sky39:~$ curl -o ~/bin/digdag --create-dirs -L "https://dl.digdag.io/digdag-latest"
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:--  0:00:02 --:--:--     0
+  0     0    0     0    0     0      0      0 --:--:--  0:00:04 --:--:--     0
+100 30.8M  100 30.8M    0     0   364k      0  0:01:26  0:01:26 --:--:--  382k
+iguchi@sky39:~$ chmod +x ~/bin/digdag
+iguchi@sky39:~$ echo 'export PATH="$HOME/bin:$PATH"' >> ~/.bashrc
+iguchi@sky39:~$ source ~/.bashrc
+
+### 動作確認
+iguchi@sky39:~$ digdag --help
+2017-11-03 09:59:00 +0900: Digdag v0.9.20
+Usage: digdag <command> [options...]
+  Local-mode commands:
+    init <dir>                         create a new workflow project
+    r[un] <workflow.dig>               run a workflow
+    c[heck]                            show workflow definitions
+    sched[uler]                        run a scheduler server
+    selfupdate                         update cli to the latest version
+
+  Server-mode commands:
+    server                             start server
+
+  Client-mode commands:
+    push <project-name>                create and upload a new revision
+    download <project-name>            pull an uploaded revision
+    start <project-name> <name>        start a new session attempt of a workflow
+    retry <attempt-id>                 retry a session
+    kill <attempt-id>                  kill a running session attempt
+    backfill <project-name> <name>     start sessions of a schedule for past times
+    reschedule                         skip sessions of a schedule to a future time
+    log <attempt-id>                   show logs of a session attempt
+    workflows [project-name] [name]    show registered workflow definitions
+    schedules                          show registered schedules
+    disable <schedule-id>              disable a workflow schedule
+    disable <project-name>             disable all workflow schedules in a project
+    disable <project-name> <name>      disable a workflow schedule
+    enable <schedule-id>               enable a workflow schedule
+    enable <project-name>              enable all workflow schedules in a project
+    enable <project-name> <name>       enable a workflow schedule
+    sessions                           show sessions for all workflows
+    sessions <project-name>            show sessions for all workflows in a project
+    sessions <project-name> <name>     show sessions for a workflow
+    session  <session-id>              show a single session
+    attempts                           show attempts for all sessions
+    attempts <session-id>              show attempts for a session
+    attempt  <attempt-id>              show a single attempt
+    tasks <attempt-id>                 show tasks of a session attempt
+    delete <project-name>              delete a project
+    secrets --project <project-name>   manage secrets
+    version                            show client and server version
+
+  Options:
+    -L, --log PATH                   output log messages to a file (default: -)
+    -l, --log-level LEVEL            log level (error, warn, info, debug or trace)
+    -X KEY=VALUE                     add a performance system config
+    -c, --config PATH.properties     Configuration file (default: /Users/iguchi/.config/digdag/config)
+
+Use `<command> --help` to see detailed usage of a command.
+iguchi@sky39:~$ ls
+Applications   Documents      Dropbox        Movies         Pictures       VirtualBox VMs gsuite         tmp
+Desktop        Downloads      Library        Music          Public         bin            nso            tsdn-nso
+
+### digdagを動作させてみる
+iguchi@sky39:~$ cd tmp/
+iguchi@sky39:~/tmp$ mkdir digdag
+iguchi@sky39:~/tmp$ cd digdag/
+iguchi@sky39:~/tmp/digdag$ digdag init mydag
+2017-11-03 09:59:28 +0900: Digdag v0.9.20
+  Creating mydag/mydag.dig
+  Creating mydag/.gitignore
+Done. Type `cd mydag` and then `digdag run mydag.dig` to run the workflow. Enjoy!
+iguchi@sky39:~/tmp/digdag$ ls
+mydag
+iguchi@sky39:~/tmp/digdag$ cd mydag
+iguchi@sky39:~/tmp/digdag/mydag$ ls
+mydag.dig
+iguchi@sky39:~/tmp/digdag/mydag$  digdag run mydag.dig
+2017-11-03 09:59:42 +0900: Digdag v0.9.20
+2017-11-03 09:59:43 +0900 [WARN] (main): Using a new session time 2017-11-03T00:00:00+00:00.
+2017-11-03 09:59:43 +0900 [INFO] (main): Using session /Users/iguchi/tmp/digdag/mydag/.digdag/status/20171103T000000+0000.
+2017-11-03 09:59:43 +0900 [INFO] (main): Starting a new session project id=1 workflow name=mydag session_time=2017-11-03T00:00:00+00:00
+2017-11-03 09:59:44 +0900 [INFO] (0017@[0:default]+mydag+setup): echo>: start 2017-11-03T00:00:00+00:00
+start 2017-11-03T00:00:00+00:00
+2017-11-03 09:59:45 +0900 [INFO] (0017@[0:default]+mydag+disp_current_date): echo>: 2017-11-03 00:00:00 +00:00
+2017-11-03 00:00:00 +00:00
+2017-11-03 09:59:45 +0900 [INFO] (0017@[0:default]+mydag+repeat): for_each>: {order=[first, second, third], animal=[dog, cat]}
+2017-11-03 09:59:46 +0900 [INFO] (0023@[0:default]+mydag+repeat^sub+for-0=order=2=third&1=animal=0=dog): echo>: third dog
+third dog
+2017-11-03 09:59:46 +0900 [INFO] (0017@[0:default]+mydag+repeat^sub+for-0=order=0=first&1=animal=0=dog): echo>: first dog
+first dog
+2017-11-03 09:59:46 +0900 [INFO] (0021@[0:default]+mydag+repeat^sub+for-0=order=1=second&1=animal=0=dog): echo>: second dog
+second dog
+2017-11-03 09:59:46 +0900 [INFO] (0024@[0:default]+mydag+repeat^sub+for-0=order=2=third&1=animal=1=cat): echo>: third cat
+third cat
+2017-11-03 09:59:46 +0900 [INFO] (0022@[0:default]+mydag+repeat^sub+for-0=order=1=second&1=animal=1=cat): echo>: second cat
+second cat
+2017-11-03 09:59:46 +0900 [INFO] (0020@[0:default]+mydag+repeat^sub+for-0=order=0=first&1=animal=1=cat): echo>: first cat
+first cat
+2017-11-03 09:59:47 +0900 [INFO] (0020@[0:default]+mydag+teardown): echo>: finish 2017-11-03T00:00:00+00:00
+finish 2017-11-03T00:00:00+00:00
+Success. Task state is saved at /Users/iguchi/tmp/digdag/mydag/.digdag/status/20171103T000000+0000 directory.
+  * Use --session <daily | hourly | "yyyy-MM-dd[ HH:mm:ss]"> to not reuse the last session time.
+  * Use --rerun, --start +NAME, or --goal +NAME argument to rerun skipped tasks.
+iguchi@sky39:~/tmp/digdag/mydag$
+
+
+############################################################
+# architecture
+# ref: http://docs.digdag.io/architecture.html
+############################################################
+
+--- 
+- 中央集権型
+- workflow: taskを並べたもの
+- task: operator pluginを使って定義される
+- operator plugin
+  - 様々なtaskを実行できるようにするplugin
+  - built-inのものもある
+    - ref: http://docs.digdag.io/operators.html
+  - digdagがtaskの管理をやってくれる.オペレータは自動化する内容にfocusできる
+    - taskがfailするとdigdagがalertを出す
+    - taskが期待する時間内に終了しなければ、digdagがnotificationを出す
+  - digdagはscheduling機能もある
+  - taskは以下の3つの実行環境で動作させることができる
+    - local machine
+    - 分散サーバ
+    - docker container
+
+- groupを使ってtaskをまとめる
+  - 複数のtaskを1つのgroupに入れられる
+
+---
+Workflow definition: *.dig files
+- .digファイルの名前がworkflow名になる
+
+############################################################
+# 2回目の実行ではtaskが実行されない
+# 全てを再実行する場合は--rerunをつける
+############################################################
+iguchi@sky39:~/tmp/digdag/mydag$ digdag run mydag.dig --rerun
+2017-12-05 23:30:17 +0900: Digdag v0.9.20
+2017-12-05 23:30:18 +0900 [WARN] (main): Reusing the last session time 2017-11-03T00:00:00+00:00.
+2017-12-05 23:30:18 +0900 [INFO] (main): Using session /Users/iguchi/tmp/digdag/mydag/.digdag/status/20171103T000000+0000.
+2017-12-05 23:30:18 +0900 [INFO] (main): Starting a new session project id=1 workflow name=mydag session_time=2017-11-03T00:00:00+00:00
+2017-12-05 23:30:19 +0900 [INFO] (0017@[0:default]+mydag+setup): echo>: start 2017-11-03T00:00:00+00:00
+start 2017-11-03T00:00:00+00:00
+2017-12-05 23:30:19 +0900 [INFO] (0017@[0:default]+mydag+disp_current_date): echo>: 2017-11-03 00:00:00 +00:00
+2017-11-03 00:00:00 +00:00
+2017-12-05 23:30:20 +0900 [INFO] (0017@[0:default]+mydag+repeat): for_each>: {order=[first, second, third], animal=[dog, cat]}
+2017-12-05 23:30:20 +0900 [INFO] (0020@[0:default]+mydag+repeat^sub+for-0=order=0=first&1=animal=1=cat): echo>: first cat
+first cat
+2017-12-05 23:30:20 +0900 [INFO] (0017@[0:default]+mydag+repeat^sub+for-0=order=0=first&1=animal=0=dog): echo>: first dog
+first dog
+2017-12-05 23:30:20 +0900 [INFO] (0021@[0:default]+mydag+repeat^sub+for-0=order=1=second&1=animal=0=dog): echo>: second dog
+second dog
+2017-12-05 23:30:20 +0900 [INFO] (0022@[0:default]+mydag+repeat^sub+for-0=order=1=second&1=animal=1=cat): echo>: second cat
+second cat
+2017-12-05 23:30:20 +0900 [INFO] (0024@[0:default]+mydag+repeat^sub+for-0=order=2=third&1=animal=1=cat): echo>: third cat
+third cat
+2017-12-05 23:30:20 +0900 [INFO] (0023@[0:default]+mydag+repeat^sub+for-0=order=2=third&1=animal=0=dog): echo>: third dog
+third dog
+2017-12-05 23:30:21 +0900 [INFO] (0023@[0:default]+mydag+teardown): echo>: finish 2017-11-03T00:00:00+00:00
+finish 2017-11-03T00:00:00+00:00
+2017-12-05 23:30:21 +0900 [INFO] (0023@[0:default]+mydag+example): loop>: 3
+2017-12-05 23:30:21 +0900 [INFO] (0023@[0:default]+mydag+example^sub+loop-0): echo>: これは0番目のループです
+これは0番目のループです
+2017-12-05 23:30:21 +0900 [INFO] (0023@[0:default]+mydag+example^sub+loop-1): echo>: これは1番目のループです
+これは1番目のループです
+2017-12-05 23:30:22 +0900 [INFO] (0023@[0:default]+mydag+example^sub+loop-2): echo>: これは2番目のループです
+これは2番目のループです
+Success. Task state is saved at /Users/iguchi/tmp/digdag/mydag/.digdag/status/20171103T000000+0000 directory.
+  * Use --session <daily | hourly | "yyyy-MM-dd[ HH:mm:ss]"> to not reuse the last session time.
+  * Use --rerun, --start +NAME, or --goal +NAME argument to rerun skipped tasks.
+iguchi@sky39:~/tmp/digdag/mydag$
+
+

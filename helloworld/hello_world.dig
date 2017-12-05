@@ -1,0 +1,31 @@
+timezone : UTC
+
++step001:
+  sh>: tasks/hello.sh
+
++step002:
+  sh>: tasks/world.sh
+
++step003:
+  py>: tasks.pyhello.MyWorkflow.step1
+
++step004:
+  py>: tasks.pyhello.MyWorkflow.step2
+
++prepare:
+  # +step5,6,7,8 run in parallel.
+  _parallel: true
+
+  +step005:
+    sh>: tasks/hello.sh
+  
+  +step006:
+    sh>: tasks/world.sh
+  
+  +step007:
+    py>: tasks.pyhello.MyWorkflow.step1
+  
+  +step008:
+    py>: tasks.pyhello.MyWorkflow.step2
+
+!include : 'time_test.dig'
