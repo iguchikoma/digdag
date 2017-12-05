@@ -1,0 +1,18 @@
+timezone: UTC
+
++setup:
+  sh>: echo start ${session_time}
+
++disp_current_date:
+  sh>: date
+
++repeat:
+  for_each>:
+    devices: [10.129.197.159]
+  _do:
+    sh>: scripts/get_log_from_1f.sh ${devices}
+  _parallel: false
+
++teardown:
+  sh>: echo finish ${session_time}
+

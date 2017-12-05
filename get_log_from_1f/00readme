@@ -1,0 +1,85 @@
+############################################################
+# how to use
+############################################################
+git clone ...
+cd digdag/get_log_from_1f
+mkdir logs
+echo USERNAME="user_username">scripts/get_log_from_1f.cfg
+echo PASSWORD="user_passwd">>scripts/get_log_from_1f.cfg
+digdag run get_log_from_1f.dig
+
+############################################################
+# 作成log
+############################################################
+
+### get_log_from_1fという名前でworkflow project作成
+iguchi@sky39:~/tmp/digdag (master)$ digdag init -t sh get_log_from_1f
+2017-12-06 01:29:37 +0900: Digdag v0.9.20
+  Creating get_log_from_1f/scripts/myscript.sh
+  Creating get_log_from_1f/get_log_from_1f.dig
+  Creating get_log_from_1f/.gitignore
+Done. Type `cd get_log_from_1f` and then `digdag run get_log_from_1f.dig` to run the workflow. Enjoy!
+iguchi@sky39:~/tmp/digdag (master)$
+
+### 自動生成された.digファイルをベースにdigdag workflowを作成
+iguchi@sky39:~/tmp/digdag/get_log_from_1f (master *+)$ cat get_log_from_1f.dig
+timezone: UTC
+
++setup:
+  sh>: echo start ${session_time}
+
++disp_current_date:
+  sh>: date
+
++repeat:
+  for_each>:
+    devices: [10.129.197.159]
+  _do:
+    sh>: scripts/get_log_from_1f.sh ${devices}
+  _parallel: false
+
++teardown:
+  sh>: echo finish ${session_time}
+
+iguchi@sky39:~/tmp/digdag/get_log_from_1f (master *+)$
+
+### 自動生成されたscripts/script.shファイルをscripts/get_log_from_1f.shを作成
+### POINT: script内部のpathは.digファイルがある場所からの相対パスとして書く
+iguchi@sky39:~/tmp/digdag/get_log_from_1f (master *+)$ cat scripts/get_log_from_1f.sh
+#!/bin/bash
+# TIPS: .cfg and .log file paths are relative path from digdag workflow file's directory
+
+# set config parameter
+. ./scripts/get_log_from_1f.cfg
+
+# create log file
+date > logs/results.log
+
+# get log
+sleep 1
+sshpass -p ${PASSWORD} ssh -p 2024 -o StrictHostKeyChecking=no ${USERNAME}@$1 show log devel.log >> logs/results.log
+
+iguchi@sky39:~/tmp/digdag/get_log_from_1f (master *+)$
+
+### shellscript内部のsshのid/passはget_log_from_1f.cfgとしてshellscriptから外出ししておく
+iguchi@sky39:~/tmp/digdag/get_log_from_1f (master *+)$ cat scripts/get_log_from_1f.cfg
+# config file
+
+USERNAME="xxx"
+PASSWORD="yyy"
+iguchi@sky39:~/tmp/digdag/get_log_from_1f (master *+)$
+
+### 取得したlogを格納するlogsディレクトリを作成
+iguchi@sky39:~/tmp/digdag/get_log_from_1f (master *+)$ touch logs
+
+### .gitignoreに*.logと*.cfgを追加
+iguchi@sky39:~/tmp/digdag/get_log_from_1f (master *+)$ cat .gitignore
+/.digdag-wrapper
+.digdag
+*.pyc
+*.cfg
+*.log
+iguchi@sky39:~/tmp/digdag/get_log_from_1f (master *+)$
+
+### commit & push
+
